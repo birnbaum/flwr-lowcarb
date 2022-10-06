@@ -1,0 +1,8 @@
+# general
+pandas
+jupyterlab
+matplotlib
+seaborn
+
+# specific
+flwr  # [simulation]? see https://flower.dev/docs/installation.html
