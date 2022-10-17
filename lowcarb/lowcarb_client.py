@@ -10,7 +10,6 @@ import torchvision.transforms as transforms
 from torch.utils.data import DataLoader, random_split
 from torchvision.datasets import CIFAR10
 
-from lowcarb.carbon_sdk_webapi import get_forecast_batch
 
 import requests
 

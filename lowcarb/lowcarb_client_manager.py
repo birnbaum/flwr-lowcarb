@@ -14,7 +14,6 @@ import requests
 from pandas import DataFrame
 from ray.exceptions import RaySystemError
 
-from lowcarb.carbon_sdk_webapi import get_forecast_batch
 
 class Object(object):
     pass
