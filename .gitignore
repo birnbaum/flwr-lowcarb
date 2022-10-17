@@ -1,5 +1,9 @@
 .idea
 venv
+
+__pycache__
+.ipynb_checkpoints
+
 example_applications/thorax_disease_classification/trained_models/*
 example_applications/thorax_disease_classification/result_stats/*
 example_applications/thorax_disease_classification/dataset
