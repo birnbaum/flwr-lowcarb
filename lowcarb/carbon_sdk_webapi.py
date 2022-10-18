@@ -1,9 +1,11 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import List
 import requests
 
 from pandas import DataFrame
 import pandas as pd
+
+from scipy.interpolate import interp1d
 
 from dateutil import parser
 
@@ -74,6 +76,10 @@ class CarbonSDK_WebAPI():
                 'value': [entry['rating'] for entry in response_json],
                 'region': region
                 })
+
+
+            df = df.pipe(timestamp)
+
             return df
         else:
             raise requests.exceptions.InvalidSchema(response.status_code)
@@ -147,3 +153,44 @@ class CarbonSDK_WebAPI():
 
         return df
 
+    def get_historic_forecast(self, region: str, start_time: datetime, windowSize: int, roundtime: int) -> DataFrame:
+        requested_time_string = (start_time - timedelta(minutes=5)).strftime(self.strftime)
+        start_time_string = start_time.strftime(self.strftime)
+        end_time_string = (start_time + timedelta(hours=roundtime)).strftime(self.strftime)
+
+
+        query_data = [
+            {"requestedAt": requested_time_string,
+             "location": region,
+             "dataStartAt": start_time_string,
+             "dataEndAt": end_time_string,
+             "windowSize": windowSize}
+        ]
+        response = requests.post('https://carbon-aware-api.azurewebsites.net/emissions/forecasts/batch', json=query_data)
+        entrys = response.json()[0]['forecastData']
+
+        df_forecast = pd.DataFrame({
+            'region': region,
+            'time': [parser.parse(entry['timestamp']) for entry in entrys],
+            'value': [entry['value'] for entry in entrys]
+        })
+
+        df_forecast = df_forecast.pipe(timestamp)
+
+        return df_forecast
+
+
+    def get_historic_forecast_batch(self, regions: List[str], start_time: datetime, windowSize: int, roundtime: int) -> DataFrame:
+        dfs = []
+        for region in regions:
+            df_region = self.get_historic_forecast(region=region, start_time=start_time, windowSize=windowSize, roundtime=roundtime)
+            dfs.append(df_region)
+
+        total_df = pd.concat(dfs)
+        return total_df
+
+def timestamp(df: DataFrame) -> DataFrame:
+    df = df.sort_values(by='time').reset_index(drop=True)
+    df['timestamp'] = df['time'].map(pd.Timestamp.timestamp)
+    df['timestamp_indv'] = (df['timestamp'] - df['timestamp'].iloc[0]) / 3600
+    return df
