@@ -6,3 +6,5 @@ seaborn
 
 # specific
 flwr  # [simulation]? see https://flower.dev/docs/installation.html
+
+./carbon_sdk_client
