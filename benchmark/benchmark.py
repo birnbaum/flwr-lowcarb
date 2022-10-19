@@ -1,4 +1,6 @@
-from datetime import timedelta
+from collections.abc import Callable
+from datetime import timedelta, datetime
+from typing import TypedDict, List
 
 import numpy as np
 import pandas as pd
@@ -21,9 +23,15 @@ def rolling_integration(df: DataFrame, origin: str, target: str, windowSize: int
 
     return df
 
+class Config(TypedDict):
+    selected_regions : List[str]
+    sim_start : datetime
+    sim_end : datetime
+    round_time : int
+    windowSize : int
+    num_clients : int
 
-def run_benchmark(config, client_selection):
-    api = CarbonSDK_WebAPI('https://carbon-aware-api.azurewebsites.net')
+def run_benchmark(api:CarbonSDK_WebAPI, config: Config, client_selection: Callable[[CarbonSDK_WebAPI, Config, int, datetime, DataFrame, int], DataFrame]) -> DataFrame:
 
     selected_regions = config['selected_regions']
     sim_start = config['sim_start']
@@ -48,7 +56,7 @@ def run_benchmark(config, client_selection):
 
 
         ###select clients using the supplied function
-        selected_clients = client_selection(config, i_round, round_start_time, clients_df, num_clients)
+        selected_clients = client_selection(api, config, i_round, round_start_time, clients_df, num_clients)
 
         ###fetch carbon_data for each selected client
         carbon_history = api\
@@ -82,8 +90,7 @@ def run_benchmark(config, client_selection):
 
     return clients_df
 
-def run_benchmark_comparison(config):
-    api = CarbonSDK_WebAPI('https://carbon-aware-api.azurewebsites.net')
+def run_benchmark_comparison(api:CarbonSDK_WebAPI, config: Config):
 
     selected_regions = config['selected_regions']
     sim_start = config['sim_start']
