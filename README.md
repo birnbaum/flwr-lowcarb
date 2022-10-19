@@ -32,3 +32,12 @@ python -m venv venv              # create venv
 .\venv\Scripts\activate           # activate venv on Windows
 pip install -r requirements.txt  # install dependencies
 ```
+
+
+# API Feedback
+
+- Python client didn't build 
+  - Exception in thread "main" java.lang.RuntimeException: Could not generate model 'CarbonIntensityBatchParametersDTO'
+  - Caused by: com.github.jknack.handlebars.HandlebarsException: model.handlebars:3:3: java.lang.reflect.InaccessibleObjectException: Unable to make field transient java.util.HashMap$Node[] java.util.HashMap.table accessible: module java.base does not "opens java.util" to unnamed module @25fb0107
+  - Caused by: java.lang.reflect.InaccessibleObjectException: Unable to make field transient java.util.HashMap$Node[] java.util.HashMap.table accessible: module java.base does not "opens java.util" to unnamed module @25fb0107
+- api_instance.get_emissions_data_for_locations_by_time returns watttime locations, so it's impossible to infer the original locations
