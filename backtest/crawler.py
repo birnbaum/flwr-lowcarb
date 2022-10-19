@@ -14,6 +14,10 @@ BACKTEST_START = "2022-10-13T00:00:00.00"
 BACKTEST_END = "2022-10-15T00:00:00.00"
 
 
+def backtest_daterange():
+    return pd.date_range(start=BACKTEST_START, end=BACKTEST_END, freq=f"{FORECAST_FREQ}min")
+
+
 def historic_forecast(api_instance, location, start_time, end_time) -> pd.DataFrame:
     api_response = api_instance.get_emissions_data_for_location_by_time(location, time=start_time, to_time=end_time)
     result = pd.DataFrame([r.to_dict() for r in api_response]).drop(columns={"duration"}).sort_values("time")
@@ -30,10 +34,10 @@ def main():
         api_instance = CarbonAwareApi(api_client)
         dfs = []
         for location in LOCATIONS:
-            for dt in pd.date_range(start=BACKTEST_START, end=BACKTEST_END, freq=f"{FORECAST_FREQ}min"):
+            for dt in backtest_daterange():
                 print(f"Query {dt} for {location}")
                 dfs.append(historic_forecast(api_instance, location, dt, dt + timedelta(minutes=FORECAST_WINDOW)))
-        pd.concat(dfs).to_csv("backtest.csv")
+        pd.concat(dfs).to_csv("backtest/history.csv")
 
 
 if __name__ == "__main__":
