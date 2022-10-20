@@ -32,9 +32,10 @@ def historic_forecast_ideal(api_instance, location, start_time, end_time) -> pd.
     return result
 
 def historic_forecast(api_instance, location, start_time, end_time) -> pd.DataFrame:
-    query_time = parser.parse(start_time) if (type(start_time) == str) else start_time
-    start_time = query_time + timedelta(minutes=5)
+    start_time = parser.parse(start_time) if (type(start_time) == str) else start_time
     end_time = parser.parse(end_time) if (type(end_time) == str) else end_time
+    query_time = start_time - timedelta(minutes=5)
+
 
     if type(location) == str:
         locations = [location]
@@ -61,7 +62,7 @@ def historic_forecast(api_instance, location, start_time, end_time) -> pd.DataFr
             result["time"] = result["time"].dt.tz_localize(None)  # remove timezone
             result = result[result["time"] >= start_time]  # api sometimes returns older values than start_time
             result["location"] = locations[i_entry]  # api returns watttime label instead of input label
-            result["query_time"] = query_time
+            result["query_time"] = start_time
             result = result.set_index(["location", "query_time", "time"])
 
             results.append(result)
