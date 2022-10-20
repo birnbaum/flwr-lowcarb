@@ -8,8 +8,10 @@ import pandas as pd
 class Strategy(ABC):
     @abstractmethod
     def select(self,
-               forecasts: Dict[str, pd.DataFrame],
-               past_participation: Dict[str, int]) -> List[str]:
+               forecasts: Dict[str, List[float]],  # location to forecast list where [0] is now
+               past_participation: Dict[str, int],  # client to number of participation rounds
+               client_location_map: Dict[str, str]  # maps clients to their locations
+               ) -> List[str]:
         """Selects a list of locations"""
 
 
@@ -17,8 +19,9 @@ class RandomStrategy(Strategy):
     def __init__(self, clients_per_round: int):
         self.clients_per_round = clients_per_round
 
-    def select(self, forecasts, past_participation):
-        return np.random.choice(list(forecasts.keys()), size=self.clients_per_round, replace=False)
+    def select(self, forecasts, past_participation, client_location_map):
+        clients = list(past_participation.keys())
+        return np.random.choice(clients, size=self.clients_per_round, replace=False)
 
 
 class CarbonAwareStrategy(Strategy):
@@ -26,7 +29,7 @@ class CarbonAwareStrategy(Strategy):
         self.clients_per_round = clients_per_round
         self.max_forecast_duration = max_forecast_duration
 
-    def select(self, forecasts, past_participation):
+    def select(self, forecasts, past_participation, client_location_map):
         """Optimize for clients with the least absolute potential to improve their carbon intensity soon.
 
         For each round, we compute an individual forecast window for each client based on its past participation.
@@ -34,12 +37,12 @@ class CarbonAwareStrategy(Strategy):
         Each client gets a score based on its absolute saving potential within the forecast window.
         The  n clients with the least potential get selected.
         """
+        clients = list(past_participation.keys())
         participation = np.array(list(past_participation.values()))
-        windows = self._calc_forecast_windows(participation)
-        forecast_arrays = [df.values for df in forecasts.values()]
-        deltas = [self._lowest_delta(fc, w) for fc, w in zip(forecast_arrays, windows)]
-        locations_sorted_by_score = pd.Series(forecasts.keys(), index=deltas).sort_index(ascending=False)
-        return locations_sorted_by_score.iloc[:self.clients_per_round].values
+        client_windows = self._calc_forecast_windows(participation)
+        deltas = [self._lowest_delta(forecasts[client_location_map[c]], w) for c, w in zip(clients, client_windows)]
+        clients_sorted_by_score = pd.Series(clients, index=deltas).sort_index(ascending=False)
+        return clients_sorted_by_score.iloc[:self.clients_per_round].values
 
     def _calc_forecast_windows(self, participation: np.array):
         if participation.max() == 0:
