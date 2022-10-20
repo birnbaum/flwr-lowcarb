@@ -7,7 +7,9 @@ import pandas as pd
 
 class Strategy(ABC):
     @abstractmethod
-    def select(self, location_forecasts: Dict[str, pd.DataFrame], past_participation: Dict[str, int]) -> List[str]:
+    def select(self,
+               forecasts: Dict[str, pd.DataFrame],
+               past_participation: Dict[str, int]) -> List[str]:
         """Selects a list of locations"""
 
 
@@ -15,8 +17,8 @@ class RandomStrategy(Strategy):
     def __init__(self, clients_per_round: int):
         self.clients_per_round = clients_per_round
 
-    def select(self, location_forecasts: Dict[str, pd.DataFrame], past_participation: Dict[str, int]) -> List[str]:
-        return np.random.choice(list(location_forecasts.keys()), size=self.clients_per_round, replace=False)
+    def select(self, forecasts, past_participation):
+        return np.random.choice(list(forecasts.keys()), size=self.clients_per_round, replace=False)
 
 
 class CarbonAwareStrategy(Strategy):
@@ -24,7 +26,7 @@ class CarbonAwareStrategy(Strategy):
         self.clients_per_round = clients_per_round
         self.max_forecast_duration = max_forecast_duration
 
-    def select(self, location_forecasts: Dict[str, pd.DataFrame], past_participation: Dict[str, int]) -> List[str]:
+    def select(self, forecasts, past_participation):
         """Optimize for clients with the least absolute potential to improve their carbon intensity soon.
 
         For each round, we compute an individual forecast window for each client based on its past participation.
@@ -34,9 +36,9 @@ class CarbonAwareStrategy(Strategy):
         """
         participation = np.array(list(past_participation.values()))
         windows = self._calc_forecast_windows(participation)
-        forecasts = [df["rating"].values for df in location_forecasts.values()]
-        deltas = [self._lowest_delta(fc, w) for fc, w in zip(forecasts, windows)]
-        locations_sorted_by_score = pd.Series(location_forecasts.keys(), index=deltas).sort_index(ascending=False)
+        forecast_arrays = [df.values for df in forecasts.values()]
+        deltas = [self._lowest_delta(fc, w) for fc, w in zip(forecast_arrays, windows)]
+        locations_sorted_by_score = pd.Series(forecasts.keys(), index=deltas).sort_index(ascending=False)
         return locations_sorted_by_score.iloc[:self.clients_per_round].values
 
     def _calc_forecast_windows(self, participation: np.array):
