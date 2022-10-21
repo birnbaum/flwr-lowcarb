@@ -4,7 +4,6 @@ import flwr as fl
 import numpy as np
 import pandas as pd
 from typing import Dict
-import model_utils
 
 def compute_class_freqs(labels):
 
