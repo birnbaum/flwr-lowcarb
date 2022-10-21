@@ -27,7 +27,8 @@ def weighted_loss(pos_weights, neg_weights, y_pred, y_true, epsilon = 1e-7):
 def train(
     net,
     trainloader,
-    epochs
+    epochs,
+    all_xray_df
     ):
     print(f'Entered train function, total num. of epochs: {epochs}')
     # ToDo: Class weights should be different for each client
@@ -66,7 +67,7 @@ def train(
     print(f'Time to complete local training round: {time_delta}')
     print('\n')
 
-def test(net, testloader, pathology_list):
+def test(net, testloader, all_xray_df):
     
     # ToDo: Class weights should be different for each client
     freq_pos, freq_neg = compute_class_freqs(all_xray_df.iloc[:,-1])    

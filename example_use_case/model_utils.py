@@ -4,6 +4,7 @@ import numpy as np
 import torch
 from torchvision import models
 import flwr as fl
+import train_eval_utils
 
 class FlowerClient(fl.client.NumPyClient):
     def __init__(self, cid, net, trainloader, valloader):
@@ -20,17 +21,19 @@ class FlowerClient(fl.client.NumPyClient):
         # Read values from config
         server_round = config["server_round"]
         local_epochs = config["local_epochs"]
+        client_xray_df = config["client_xray_df"]
 
         # Use values provided by the config
         print(f"[Client {self.cid}, round {server_round}] fit, config: {config}")
         set_parameters(self.net, parameters)
-        train(self.net, self.trainloader, epochs=local_epochs)
+        train_eval_utils.train(self.net, self.trainloader, epochs=local_epochs, client_xray_df=client_xray_df)
         return get_parameters(self.net), len(self.trainloader), {}
 
     def evaluate(self, parameters, config):
         print(f"[Client {self.cid}] evaluate, config: {config}")
+        client_xray_df = config["client_xray_df"]
         set_parameters(self.net, parameters)
-        loss, accuracy = test(self.net, self.valloader)
+        loss, accuracy = train_eval_utils.test(self.net, self.valloader, client_xray_df=client_xray_df)
         return float(loss), len(self.valloader), {"accuracy": float(accuracy)}
 
 def init_net():
