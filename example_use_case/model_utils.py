@@ -1,9 +1,7 @@
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-
-from torchvision import transforms as T, models
-
+from typing import Dict, List
+from collections import OrderedDict
+import numpy as np
+from torchvision import models
 import flwr as fl
 
 class FlowerClient(fl.client.NumPyClient):
