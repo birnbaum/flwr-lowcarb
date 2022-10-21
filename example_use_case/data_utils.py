@@ -1,5 +1,6 @@
 from PIL import Image
 
+import numpy as np
 import pandas as pd
 import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader, random_split
