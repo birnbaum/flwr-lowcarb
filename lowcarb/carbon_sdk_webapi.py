@@ -9,12 +9,17 @@ from scipy.interpolate import interp1d
 
 from dateutil import parser
 
+from carbon_sdk_client.openapi_client.api.carbon_aware_api import CarbonAwareApi
+from carbon_sdk_client.openapi_client.api_client import ApiClient
+from carbon_sdk_client.openapi_client.configuration import Configuration
 
 class CarbonSDK_WebAPI():
     strftime = '%Y-%m-%dT%H:%M:%S'
 
     def __init__(self, url='https://carbon-aware-api.azurewebsites.net'):
         self.url = url
+        self.api_client = ApiClient(configuration=Configuration(host=self.url))
+        self.api_instance = api_instance = CarbonAwareApi(self.api_client)
 
     def get_forecast(self, region: str, windowSize: int) -> DataFrame:
         '''
@@ -188,6 +193,16 @@ class CarbonSDK_WebAPI():
 
         total_df = pd.concat(dfs)
         return total_df
+
+    def historic_forecast(self, location, start_time, end_time) -> pd.DataFrame:
+        api_response = self.api_instance.get_emissions_data_for_location_by_time(location, time=start_time, to_time=end_time)
+        result = pd.DataFrame([r.to_dict() for r in api_response]).drop(columns={"duration"}).sort_values("time")
+        result["time"] = result["time"].dt.tz_localize(None)  # remove timezone
+        result = result[result["time"] >= start_time]  # api sometimes returns older values than start_time
+        result["location"] = location  # api returns watttime label instead of input label
+        result["query_time"] = start_time
+        result = result.set_index(["location", "query_time", "time"])
+        return result
 
 def timestamp(df: DataFrame) -> DataFrame:
     df = df.sort_values(by='time').reset_index(drop=True)
