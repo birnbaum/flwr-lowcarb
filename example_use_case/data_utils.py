@@ -1,33 +1,15 @@
-import os
-import sys
-import math
-from glob import glob
 from PIL import Image
-from collections import OrderedDict
-from typing import Dict, List, Optional, Tuple
 
-import flwr as fl
-import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-from sklearn.model_selection import train_test_split
-
-import torch
-import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader, random_split
 
-from torchvision.utils import make_grid
-from torchvision.datasets import CIFAR10
 from torchvision import transforms as T, models
-
 
 def inv_data_transform(img):
     img = img.permute(1,2,0)
     img = img * torch.Tensor([0.229, 0.224, 0.225]) + torch.Tensor([0.485, 0.456, 0.406])
     return img
-
-
 
 class NIH_Dataset(Dataset):
   def __init__(
@@ -36,7 +18,7 @@ class NIH_Dataset(Dataset):
     transform=None
     ):
     self.data_df = data_df
-    self.transform = transform 
+    self.transform = transform  
 
   def __len__(
     self
