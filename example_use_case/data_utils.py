@@ -3,6 +3,7 @@ from PIL import Image
 import pandas as pd
 import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader, random_split
+from sklearn.model_selection import train_test_split
 
 from torchvision import transforms as T, models
 
