@@ -39,7 +39,7 @@ def init_net():
   )
   net.classifier[-1] = torch.nn.Linear(
       net.classifier[-1].in_features,
-      len(all_labels)
+      13
   )
   return net
 
