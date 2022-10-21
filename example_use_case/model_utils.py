@@ -22,18 +22,21 @@ class FlowerClient(fl.client.NumPyClient):
         server_round = config["server_round"]
         local_epochs = config["local_epochs"]
         client_xray_df = config["client_xray_df"]
+        DEVICE = config["DEVICE"]
 
         # Use values provided by the config
         print(f"[Client {self.cid}, round {server_round}] fit, config: {config}")
         set_parameters(self.net, parameters)
-        train_eval_utils.train(self.net, self.trainloader, epochs=local_epochs, client_xray_df=client_xray_df)
+        train_eval_utils.train(self.net, self.trainloader, epochs=local_epochs, client_xray_df=client_xray_df, device=DEVICE)
         return get_parameters(self.net), len(self.trainloader), {}
 
-    def evaluate(self, parameters, config):
+    def evaluate(self, parameters, config, len_labels, DEVICE):
         print(f"[Client {self.cid}] evaluate, config: {config}")
         client_xray_df = config["client_xray_df"]
+        all_labels = config["all_labels"]
+        DEVICE = config["DEVICE"]
         set_parameters(self.net, parameters)
-        loss, accuracy = train_eval_utils.test(self.net, self.valloader, client_xray_df=client_xray_df)
+        loss, accuracy = train_eval_utils.test(self.net, self.valloader, client_xray_df=client_xray_df, device=DEVICE)
         return float(loss), len(self.valloader), {"accuracy": float(accuracy)}
 
 def init_net():
