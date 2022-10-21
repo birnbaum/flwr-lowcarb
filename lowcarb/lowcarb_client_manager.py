@@ -14,6 +14,9 @@ import requests
 from pandas import DataFrame
 from ray.exceptions import RaySystemError
 
+from backtest.strategy import CarbonAwareStrategy
+
+import numpy as np
 
 class Object(object):
     pass
@@ -27,12 +30,25 @@ class LowCarb_ClientManager(fl.server.client_manager.SimpleClientManager):
     def __init__(self, **kargs):
         super(LowCarb_ClientManager, self).__init__(**kargs)
 
+
+        self.client_participation = pd.DataFrame({'cid': [], 'participation': []})
+
     def sample(
             self,
             num_clients: int,
             min_num_clients: Optional[int] = None,
             criterion: Optional[Criterion] = None,
     ) -> List[ClientProxy]:
+
+
+        #####each sample round add any new client to the participitation DataFrame
+        available_cids = list(self.clients.keys())
+        for available_cid in available_cids:
+            if not (available_cid in self.client_participation['cid'].to_list()):
+                self.client_participation = pd.concat([self.client_participation, pd.DataFrame({'cid': [available_cid], 'participation': [0]})]).reset_index(drop=True)
+
+
+
         """Sample a number of Flower ClientProxy instances."""
         # Block until at least num_clients are connected.
         if min_num_clients is None:
@@ -59,17 +75,29 @@ class LowCarb_ClientManager(fl.server.client_manager.SimpleClientManager):
 
 
 
+        # data for the strategy to select the next best clients
+        client_locations = self.get_client_locations()
+        present_locations = pd.Series(client_locations.values()).unique()
+        forecasts = get_random_forecast(present_locations)
+        client_participation = {client['cid']: client['participation'] for i, client in self.client_participation.iterrows()}
 
-        clients_properties = self.get_client_locations()
+
+        strategy = CarbonAwareStrategy(clients_per_round=num_clients, max_forecast_duration=12)
+        selected_clients = strategy.select(forecasts=forecasts, past_participation=client_participation, client_location_map=client_locations)
+
+        self.client_participation.loc[(self.client_participation['cid'].isin(selected_clients), 'participation')] = self.client_participation.loc[(self.client_participation['cid'].isin(selected_clients), 'participation')] + 1
+
 
         print('_______________________________________________________________________\n Available Clients with their locations\n_______________________________________________________________________')
-        print(clients_properties)
-        carbon_optimal_cids = self.carbon_aware_sampling(clients_properties)
+        print(client_locations)
+
+        print('_______________________________________________________________________\n Available Clients with their participation\n_______________________________________________________________________')
+        print(self.client_participation)
 
         print('_______________________________________________________________________\n selected low carbon clients\n_______________________________________________________________________')
-        print(carbon_optimal_cids)
+        print(selected_clients)
 
-        return [self.clients[cid] for cid in carbon_optimal_cids['cid']]
+        return [self.clients[cid] for cid in selected_clients]
 
         # return [self.clients[cid] for cid in sampled_cids]
 
@@ -95,22 +123,28 @@ class LowCarb_ClientManager(fl.server.client_manager.SimpleClientManager):
             'location': [client_prop['location'] for client_prop in client_props]
         })
 
-        return location_df
+        client_locations = {client['cid']: client['location'] for i, client in
+                                location_df.iterrows()}
 
-    def carbon_aware_sampling(self, available_clients: DataFrame) -> DataFrame:
-        '''
-        Receives a list of all available clients and their location
-        :param available_clients:
-        :return: pandas dataframe with the selected carbon aware clients
-        '''
+        return client_locations
 
+def get_random_forecast(locations):
+    MAX_DURATION_FORECAST = 12
+    N_DATAPOINTS = 100
+    DATAPOINTS = np.linspace(0, MAX_DURATION_FORECAST, N_DATAPOINTS)
+    mesh = np.meshgrid(DATAPOINTS, np.arange(0, len(locations), 1))[0]
+    x_offset = np.random.random((len(locations), 1)) * 10
+    y_scale = np.random.random((len(locations), 1)) * 250
+    slope = np.random.random((len(locations), 1)) * 1
+    y_offset = np.random.random((len(locations), 1)) * 500
+    wavelength = np.random.random((len(locations), 1))
+    noise_strength = np.random.random((len(locations), 1)) * 250
+    noise = np.random.random((len(locations), N_DATAPOINTS)) * noise_strength
+    bias = np.linspace(0, 1000, len(locations))
+    bias = bias.reshape(len(locations), 1)
 
+    sample_forecasts_data = bias + ((np.sin((mesh*wavelength) + x_offset) * y_scale) + ((mesh*slope)+y_offset)) + noise
+    sample_forecasts_data = sample_forecasts_data.clip(min=0)
 
-        selected_clients = available_clients[available_clients['location'] == 'norway']
-
-        try:
-            carbon_forecasts = get_forecast_batch(['westus', 'westus', 'westus', 'westus', 'westus', 'westus'], 10)
-        except:
-            pass ##hehe jo
-
-        return selected_clients
+    forecasts = {locations[i]: sample_forecasts_data[i].tolist() for i, data in enumerate(sample_forecasts_data)}
+    return forecasts
