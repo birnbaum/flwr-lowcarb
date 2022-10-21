@@ -1,6 +1,7 @@
 from typing import Dict, List
 from collections import OrderedDict
 import numpy as np
+import torch
 from torchvision import models
 import flwr as fl
 
