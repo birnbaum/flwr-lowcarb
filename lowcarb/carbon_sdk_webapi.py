@@ -21,7 +21,7 @@ class CarbonSDK_WebAPI():
         self.api_client = ApiClient(configuration=Configuration(host=self.url))
         self.api_instance = api_instance = CarbonAwareApi(self.api_client)
 
-    def get_forecast(self, region: str, windowSize: int) -> DataFrame:
+    def get_forecast(self, region: str, windowSize: int, forecast_window=None) -> DataFrame:
         '''
         Fetches forecast from the carbon_sdk and merges it into a pandas Dataframe
 
@@ -31,7 +31,15 @@ class CarbonSDK_WebAPI():
         :return: pandas Dataframe with 'time' and 'carbon value' column
         :raises: raises InvalidSchemaif anything goes wrong
         '''
-        response = requests.get(f'{self.url}/emissions/forecasts/current?location={region}&windowSize={windowSize}')
+
+        if forecast_window:
+            forecast_window = 22 if (forecast_window > 22) else forecast_window
+            end = datetime.now() + timedelta(hours=forecast_window)
+            forecast_window_string = f'&dataEndAt={end.strftime(self.strftime)}'
+        else:
+            forecast_window_string = ''
+
+        response = requests.get(f'{self.url}/emissions/forecasts/current?location={region}&windowSize={windowSize}'+forecast_window_string)
         if response.status_code == 200:
             response_json = response.json()[0]
             df = pd.DataFrame({
@@ -43,7 +51,7 @@ class CarbonSDK_WebAPI():
         else:
             raise requests.exceptions.InvalidSchema(response.status_code)
 
-    def get_forecast_batch(self, regions: List[str], windowSize: int) -> DataFrame:
+    def get_forecast_batch(self, regions: List[str], windowSize: int, forecast_window = None) -> DataFrame:
         '''
         Fetches forecast from carbon_sdk and merges it into a pandas Dataframe for all regions
         :param regions: list of strings of regions
@@ -53,7 +61,7 @@ class CarbonSDK_WebAPI():
         '''
         dfs = []
         for region in regions:
-            df_region = self.get_forecast(region=region, windowSize=windowSize)
+            df_region = self.get_forecast(region=region, windowSize=windowSize, forecast_window=forecast_window)
             dfs.append(df_region)
 
         total_df = pd.concat(dfs)

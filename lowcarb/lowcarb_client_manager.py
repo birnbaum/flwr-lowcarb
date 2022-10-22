@@ -16,6 +16,9 @@ from ray.exceptions import RaySystemError
 
 from backtest.strategy import CarbonAwareStrategy
 
+
+from lowcarb.carbon_sdk_webapi import CarbonSDK_WebAPI
+
 import numpy as np
 
 class Object(object):
@@ -27,11 +30,14 @@ class LowCarb_ClientManager(fl.server.client_manager.SimpleClientManager):
     Implementation of lowcarbs ClientManager, which is a simple extension of flower's own standard SimpleClientManager.
     lowcarb achieves carbon aware federated learning by implementing the sample() method to select clients in a way to minmize the carbon foodprint while maintaining net integrity.
     '''
-    def __init__(self, **kargs):
+    def __init__(self, api_host, workload_duration=15, forecast_window=12, **kargs):
         super(LowCarb_ClientManager, self).__init__(**kargs)
+        self.host = api_host
+        self.api = CarbonSDK_WebAPI(self.host)
+        self.workload_duration = workload_duration
+        self.forecast_window = forecast_window
 
-
-        self.client_participation = pd.DataFrame({'cid': [], 'participation': []})
+        self.client_participation: dict[str: int] = {}
 
     def sample(
             self,
@@ -41,12 +47,12 @@ class LowCarb_ClientManager(fl.server.client_manager.SimpleClientManager):
     ) -> List[ClientProxy]:
 
 
-        #####each sample round add any new client to the participitation DataFrame
-        available_cids = list(self.clients.keys())
-        for available_cid in available_cids:
-            if not (available_cid in self.client_participation['cid'].to_list()):
-                self.client_participation = pd.concat([self.client_participation, pd.DataFrame({'cid': [available_cid], 'participation': [0]})]).reset_index(drop=True)
 
+
+        #####each sample round add any new client to the participitation DataFrame
+        for cid in list(self.clients.keys()):
+            if not (cid in self.client_participation.keys()):
+                self.client_participation[cid] = 0
 
 
         """Sample a number of Flower ClientProxy instances."""
@@ -76,32 +82,36 @@ class LowCarb_ClientManager(fl.server.client_manager.SimpleClientManager):
 
 
         # data for the strategy to select the next best clients
-        client_locations = self.get_client_locations()
+        client_locations = self._get_client_locations()
         present_locations = pd.Series(client_locations.values()).unique()
-        forecasts = get_random_forecast(present_locations)
-        client_participation = {client['cid']: client['participation'] for i, client in self.client_participation.iterrows()}
+        forecasts = self._get_location_forecasts(present_locations)
 
+        available_cids_participation = {cid: self.client_participation[cid] for cid in available_cids}
 
-        strategy = CarbonAwareStrategy(clients_per_round=num_clients, max_forecast_duration=12)
-        selected_clients = strategy.select(forecasts=forecasts, past_participation=client_participation, client_location_map=client_locations)
+        strategy = CarbonAwareStrategy(clients_per_round=num_clients, max_forecast_duration=self.forecast_window)
+        selected_clients = strategy.select(forecasts=forecasts, past_participation=available_cids_participation, client_location_map=client_locations)
 
-        self.client_participation.loc[(self.client_participation['cid'].isin(selected_clients), 'participation')] = self.client_participation.loc[(self.client_participation['cid'].isin(selected_clients), 'participation')] + 1
+        for client in selected_clients:
+            self.client_participation[client] = self.client_participation[client] + 1
 
 
         print('_______________________________________________________________________\n Available Clients with their locations\n_______________________________________________________________________')
-        print(client_locations)
+        for client, location in client_locations.items():
+            print(f'{client} {location}')
 
         print('_______________________________________________________________________\n Available Clients with their participation\n_______________________________________________________________________')
-        print(self.client_participation)
+        for client, participation in available_cids_participation.items():
+            print(f'{client} {participation}')
 
         print('_______________________________________________________________________\n selected low carbon clients\n_______________________________________________________________________')
-        print(selected_clients)
+        for client in selected_clients:
+            print(f'{client}')
 
         return [self.clients[cid] for cid in selected_clients]
 
         # return [self.clients[cid] for cid in sampled_cids]
 
-    def get_client_locations(self) -> DataFrame:
+    def _get_client_locations(self) -> dict[str, str]:
         '''
         Fetches all the clients' location and puts it in a DataFrame
         :return: pandas Dataframe with 'cid' and 'location' column
@@ -128,23 +138,7 @@ class LowCarb_ClientManager(fl.server.client_manager.SimpleClientManager):
 
         return client_locations
 
-def get_random_forecast(locations):
-    MAX_DURATION_FORECAST = 12
-    N_DATAPOINTS = 100
-    DATAPOINTS = np.linspace(0, MAX_DURATION_FORECAST, N_DATAPOINTS)
-    mesh = np.meshgrid(DATAPOINTS, np.arange(0, len(locations), 1))[0]
-    x_offset = np.random.random((len(locations), 1)) * 10
-    y_scale = np.random.random((len(locations), 1)) * 250
-    slope = np.random.random((len(locations), 1)) * 1
-    y_offset = np.random.random((len(locations), 1)) * 500
-    wavelength = np.random.random((len(locations), 1))
-    noise_strength = np.random.random((len(locations), 1)) * 250
-    noise = np.random.random((len(locations), N_DATAPOINTS)) * noise_strength
-    bias = np.linspace(0, 1000, len(locations))
-    bias = bias.reshape(len(locations), 1)
-
-    sample_forecasts_data = bias + ((np.sin((mesh*wavelength) + x_offset) * y_scale) + ((mesh*slope)+y_offset)) + noise
-    sample_forecasts_data = sample_forecasts_data.clip(min=0)
-
-    forecasts = {locations[i]: sample_forecasts_data[i].tolist() for i, data in enumerate(sample_forecasts_data)}
-    return forecasts
+    def _get_location_forecasts(self, locations) -> Dict[str, list]:
+        forecasts_response = self.api.get_forecast_batch(locations, windowSize=self.workload_duration, forecast_window=self.forecast_window)
+        forecasts = {region: forecast['value'].to_list() for region, forecast in forecasts_response.groupby('region')}
+        return forecasts
