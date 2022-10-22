@@ -42,7 +42,7 @@ class CarbonAwareStrategy(Strategy):
         client_windows = self._calc_forecast_windows(participation)
         deltas = [self._lowest_delta(forecasts[client_location_map[c]], w) for c, w in zip(clients, client_windows)]
         clients_sorted_by_score = pd.Series(clients, index=deltas).sort_index(ascending=False)
-        return clients_sorted_by_score.iloc[:self.clients_per_round].values
+        return list(clients_sorted_by_score.iloc[:self.clients_per_round].values)
 
     def _calc_forecast_windows(self, participation: np.array):
         if participation.max() == 0:
@@ -53,8 +53,9 @@ class CarbonAwareStrategy(Strategy):
         normalized = np.maximum(0, 2 * participation / participation.max() - 1)
         return np.round(normalized * self.max_forecast_duration).astype(int)
 
-    def _lowest_delta(self, forecast: np.array, window: int):
+    def _lowest_delta(self, forecast: list, window: int):
         """Returns the lowest delta of and forecasted value compared to 'now'"""
+        forecast = np.array(forecast) if (type(forecast) == list) else forecast
         now = forecast[0]
         if window == 0:  # TODO document
             return 100000 - now
