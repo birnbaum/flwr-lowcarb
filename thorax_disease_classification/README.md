@@ -13,7 +13,7 @@ In our approach, we employ a smart optimization algorithm that results in a <spa
 
 ## About the dataset
 ### National Institutes of Health (NIH) Chest X-Ray Dataset
-The NIH ChestX-ray dataset comprises 112,120 frontal-view X-ray images of 30,805 unique patients with the text-mined fourteen disease image labels (where each image can have multi-labels), mined from the associated radiological reports using natural language processing. Fourteen common thoracic pathologies include Atelectasis, Consolidation, Infiltration, Pneumothorax, Edema, Emphysema, Fibrosis, Effusion, Pneumonia, Pleural_thickening, Cardiomegaly, Nodule, Mass and Hernia, which is an extension of the 8 common disease patterns listed in the CVPR2017 paper \cite{paper}.
+The NIH ChestX-ray dataset [[2]](#2) comprises 112,120 frontal-view X-ray images of 30,805 unique patients with the text-mined fourteen disease image labels (where each image can have multi-labels), mined from the associated radiological reports using natural language processing. Fourteen common thoracic pathologies include Atelectasis, Consolidation, Infiltration, Pneumothorax, Edema, Emphysema, Fibrosis, Effusion, Pneumonia, Pleural_thickening, Cardiomegaly, Nodule, Mass and Hernia.
 ## Results
 Show results of CO2 savings using flower. Compare 2 training traces, one using random client selection and one using Flower.s
 # How to run the experiment yourself
@@ -44,3 +44,9 @@ before running the following terminal command:\
 McMahan et al. (2016).\
 Communication-efficient Learning of Deep Neural Networks.\
 https://arxiv.org/abs/1602.05629
+\
+\
+<a id="2">[2]</a> 
+Wang et al. (2017)\
+ChestX-ray8: Hospital-scale Chest X-ray Database and Benchmarks on Weakly-Supervised Classification and Localization of Common Thorax Diseases.\
+https://arxiv.org/abs/1705.02315
