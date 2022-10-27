@@ -3,7 +3,10 @@ venv
 
 __pycache__
 .ipynb_checkpoints
+
+*.egg-info
 .eggs
+build
 
 dataset
 example_applications/thorax_disease_classification/trained_models/*

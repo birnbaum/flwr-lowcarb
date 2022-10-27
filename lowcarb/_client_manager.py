@@ -1,19 +1,17 @@
-import sys
-from abc import ABC, abstractmethod
 from collections import defaultdict
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional
 
-import numpy as np
 import pandas as pd
 from flwr.common import GetPropertiesIns
 from flwr.server import SimpleClientManager
 from flwr.server.criterion import Criterion
 from flwr.server.client_proxy import ClientProxy
 
-from carbon_sdk_client.openapi_client.api.carbon_aware_api import CarbonAwareApi
-from carbon_sdk_client.openapi_client.api_client import ApiClient
-from carbon_sdk_client.openapi_client.configuration import Configuration
+from lowcarb._strategy import CarbonAwareStrategy
+from lowcarb.python_carbon_sdk_client.openapi_client.configuration import Configuration
+from lowcarb.python_carbon_sdk_client.openapi_client.api_client import ApiClient
+from lowcarb.python_carbon_sdk_client.openapi_client.api.carbon_aware_api import CarbonAwareApi
 
 
 class LowcarbClientManager(SimpleClientManager):

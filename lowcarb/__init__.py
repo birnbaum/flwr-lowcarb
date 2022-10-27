@@ -1,1 +1,1 @@
-from lowcarb.client_manager import LowcarbClientManager
+from lowcarb._client_manager import LowcarbClientManager
