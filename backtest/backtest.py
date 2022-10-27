@@ -1,10 +1,8 @@
 import numpy as np
 import pandas as pd
 
-from strategy import Strategy, RandomStrategy, CarbonAwareStrategy
 from crawler import backtest_daterange, LOCATIONS
-
-# TODO: For now we assume one client per location
+from lowcarb._strategy import Strategy, RandomStrategy, CarbonAwareStrategy
 
 
 def run_backtest(actuals_path: str, forecasts_path: str, n_clients: int, strategy: Strategy):
@@ -44,5 +42,6 @@ def run_backtest(actuals_path: str, forecasts_path: str, n_clients: int, strateg
 
 
 if __name__ == "__main__":
-    # run_backtest("backtest/actuals.csv", "backtest/forecasts.csv", strategy=RandomStrategy(3))
-    run_backtest("backtest/actuals.csv", "backtest/forecasts.csv", n_clients=100, strategy=CarbonAwareStrategy(clients_per_round=3, max_forecast_duration=36))
+    # RandomStrategy(num_clients=10)
+    strategy = CarbonAwareStrategy(num_clients=10, max_forecast_duration=36)
+    run_backtest("backtest/actuals.csv", "backtest/forecasts.csv", n_clients=100, strategy=strategy)

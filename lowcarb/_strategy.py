@@ -1,3 +1,4 @@
+import sys
 from abc import ABC, abstractmethod
 from typing import Dict, List
 
@@ -16,17 +17,17 @@ class Strategy(ABC):
 
 
 class RandomStrategy(Strategy):
-    def __init__(self, clients_per_round: int):
-        self.clients_per_round = clients_per_round
+    def __init__(self, num_clients: int):
+        self.num_clients = num_clients
 
     def select(self, forecasts, past_participation, client_location_map):
         clients = list(past_participation.keys())
-        return np.random.choice(clients, size=self.clients_per_round, replace=False)
+        return np.random.choice(clients, size=self.num_clients, replace=False)
 
 
 class CarbonAwareStrategy(Strategy):
-    def __init__(self, clients_per_round: int, max_forecast_duration: int):
-        self.clients_per_round = clients_per_round
+    def __init__(self, num_clients: int, max_forecast_duration: int):
+        self.num_clients = num_clients
         self.max_forecast_duration = max_forecast_duration
 
     def select(self, forecasts, past_participation, client_location_map):
@@ -38,27 +39,42 @@ class CarbonAwareStrategy(Strategy):
         The  n clients with the least potential get selected.
         """
         clients = list(past_participation.keys())
-        participation = np.array(list(past_participation.values()))
-        client_windows = self._calc_forecast_windows(participation)
-        deltas = [self._lowest_delta(forecasts[client_location_map[c]], w) for c, w in zip(clients, client_windows)]
-        clients_sorted_by_score = pd.Series(clients, index=deltas).sort_index(ascending=False)
-        return list(clients_sorted_by_score.iloc[:self.clients_per_round].values)
+        participations = np.array(list(past_participation.values()))
+        windows = self._calc_forecast_windows(participations)
+        participation_limit = np.percentile(participations, 80)
+        scores = []
+        for client, participation, window in zip(clients, participations, windows):
+            if participation > participation_limit:
+                scores.append(-sys.maxsize)
+                continue
+            forecast = forecasts[client_location_map[client]]
+            scores.append(self._score(forecast=forecast, window=window))
+        clients_sorted_by_score = pd.Series(clients, index=scores).sort_index(ascending=False)
+        return list(clients_sorted_by_score.iloc[:self.num_clients].values)
 
     def _calc_forecast_windows(self, participation: np.array):
+        """Maps a client's participation to its forecast window.
+
+        Naive approach:
+        - Clients below 50% of max participation have to participate immediately.
+        - Clients above 50% get windows that linearly scale with the max_forecast_duration.
+        - Hence, the client with max participation always gets max_forecast_duration.
+        """
         if participation.max() == 0:
             return np.full(shape=len(participation), fill_value=self.max_forecast_duration)
-        # Clients below 50% of max participation have to participate immediately
-        # Clients above 50% get windows that linearly scale with the max_forecast_duration
-        # Hence, the client with max participation always gets max_forecast_duration
         normalized = np.maximum(0, 2 * participation / participation.max() - 1)
         return np.round(normalized * self.max_forecast_duration).astype(int)
 
-    def _lowest_delta(self, forecast: list, window: int):
-        """Returns the lowest delta of and forecasted value compared to 'now'"""
+    def _score(self, forecast: list, window: int):
+        """Returns the lowest delta of and forecasted value compared to 'now'.
+
+        If the window is 0, we want the client to participate in any case, so we give it a very high score,
+        only weighted by the absolute carbon intensity of 'now'.
+        """
         forecast = np.array(forecast) if (type(forecast) == list) else forecast
         now = forecast[0]
-        if window == 0:  # TODO document
-            return 100000 - now
+        if window == 0:
+            return sys.maxsize - now
         future = forecast[1:window + 1]
         min_delta = (future - now).min()
         return min_delta
