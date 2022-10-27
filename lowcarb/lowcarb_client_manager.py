@@ -1,24 +1,31 @@
 from collections import defaultdict
+from datetime import datetime, timedelta
 from typing import Dict, List, Optional
 
+import pandas as pd
 from flwr.server import SimpleClientManager
 from flwr.server.criterion import Criterion
 from flwr.server.client_proxy import ClientProxy
+from pandas import DataFrame
 
 from backtest.strategy import CarbonAwareStrategy
-from lowcarb.carbon_sdk_webapi import CarbonSDK_WebAPI
+from unittest.mock import Mock
 
-
-class Object:
-    pass
-
+from carbon_sdk_client.openapi_client.api.carbon_aware_api import CarbonAwareApi
+from carbon_sdk_client.openapi_client.api_client import ApiClient
+from carbon_sdk_client.openapi_client.configuration import Configuration
+from carbon_sdk_client.openapi_client.exceptions import OpenApiException
 
 class LowcarbClientManager(SimpleClientManager):
     """Extends Flower's SimpleClientManager by selecting clients in a carbon-aware manner instead of randomly."""
 
     def __init__(self, api_host, workload_duration=15, forecast_window=12):
         self.host = api_host
-        self.api = CarbonSDK_WebAPI(self.host)
+
+        self.api_client = ApiClient(configuration=Configuration(host=self.host))
+        self.api_instance = CarbonAwareApi(self.api_client)
+
+
         self.workload_duration = workload_duration
         self.forecast_window = forecast_window
         self.client_participation: Dict[str: int] = defaultdict(int)
@@ -80,18 +87,60 @@ class LowcarbClientManager(SimpleClientManager):
         """Fetches the clients' locations."""
         client_props = []
         for cid, client in self.clients.items():
-            # TODO Not sure if I get this, couldn't this be a dict
-            #  {'config': {'config_value': 'config_sample_value'}} ?
-            Ins = Object()  # weird hack for gRPC, I guess the Ins for get_properties are missing in flwr
-            Ins.config = {'config_value': 'config_sample_value'}
+            Ins = Mock()
+            Ins.config = {}
             client_prop = client.get_properties(ins=Ins, timeout=500)
             client_prop.properties.update({'cid': cid})
             client_props.append(client_prop.properties)
         return {client_prop['cid']: client_prop['location'] for client_prop in client_props}
 
     def _get_location_forecasts(self, locations) -> Dict[str, list]:
-        # TODO use OpenAPI client
-        forecasts_response = self.api.get_forecast_batch(locations, windowSize=self.workload_duration,
+        forecasts_response = self._get_forecast_batch(locations, window_size=self.workload_duration,
                                                          forecast_window=self.forecast_window)
         forecasts = {region: forecast['value'].to_list() for region, forecast in forecasts_response.groupby('region')}
         return forecasts
+
+    def _get_forecast(self, region: str, window_size: int, forecast_window=None) -> DataFrame:
+        '''
+        Fetches forecast from the carbon_sdk and merges it into a pandas Dataframe
+
+        :param region: string of the region -> Free version of WhattTime only allows 'westis'
+        :param window_size: expected time of the workload in minutes
+        :return: pandas Dataframe with 'time' and 'carbon value' column
+        :raises: raises InvalidSchemaif anything goes wrong
+        '''
+        try:
+            if forecast_window:
+                forecast_window = 22 if (forecast_window > 22) else forecast_window
+                end = datetime.now() + timedelta(hours=forecast_window)
+                response = self.api_instance.get_current_forecast_data([region], data_end_at=end, window_size=window_size)
+            else:
+                response = self.api_instance.get_current_forecast_data([region], window_size=window_size)
+
+            df = pd.DataFrame({
+                'time': [entry['timestamp'] for entry in response[0]['forecast_data']],
+                'value': [entry['value'] for entry in response[0]['forecast_data']],
+                'region': region
+            })
+            return df
+
+        except OpenApiException as e:
+            print("Exception when calling CarbonAwareApi->get_current_forecast_data: %s\n" % e)
+
+
+
+    def _get_forecast_batch(self, regions: List[str], window_size: int, forecast_window = None) -> DataFrame:
+        '''
+        Fetches forecast from carbon_sdk and merges it into a pandas Dataframe for all regions
+        :param regions: list of strings of regions
+        :param window_size: expected time of the workload in minutes
+        :return: pandas Dataframe with 'time', 'carbon value' and 'region' column
+        :raises: raises InvalidSchema if anything goes wrong
+        '''
+        dfs = []
+        for region in regions:
+            df_region = self._get_forecast(region=region, window_size=window_size, forecast_window=forecast_window)
+            dfs.append(df_region)
+
+        total_df = pd.concat(dfs)
+        return total_df
