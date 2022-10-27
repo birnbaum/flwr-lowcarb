@@ -1,21 +1,6 @@
-# Carbon Hack 22
+# Carbon-Aware Federated Learning
 
-Links:
-- [Our project](https://taikai.network/en/gsf/hackathons/carbonhack22/projects/cl8wyghoi75233101wux9vigobp/idea) 
-- [Carbon Hack Discord](https://discord.com/channels/1009739251761565696/1016261144803016744)
-
-
-## 2 Minute Video
-
-- Explain why FL great use case for Carbon-Aware SDK
-  - SDK usage on two dimensions: Space and time
-  - Motivate scale of problem (Impact)
-- Idee und Scheduler vorstellen (Evtl 2 verschiedene oder parametrisierbare)
-  - Kurz und abstrakt, ok wenn man Leute mal für ne Sekunde abhängt, weil krass
-- Evaluation that results in crazy CO2 reduction
-  - Impact betonen (2 Unternehmen benutzen Lowcarb=xyz g CO2 Einsparung  vs. alle Big Tech Unternehmen trainieren nurnoch mit lowcarb=xyz 10^100 g CO2 Einsparung)
-- Mention ready-to-use Flower plugin (Feasibility)
-- Vision (inklusiv welche weiteren Schritte wir nach dem PoC gehen würden etc.)
+`flwr-lowcarb`
 
 
 ## Concept
@@ -40,7 +25,42 @@ pip install -r requirements.txt  # install dependencies
   - Exception in thread "main" java.lang.RuntimeException: Could not generate model 'CarbonIntensityBatchParametersDTO'
   - Caused by: com.github.jknack.handlebars.HandlebarsException: model.handlebars:3:3: java.lang.reflect.InaccessibleObjectException: Unable to make field transient java.util.HashMap$Node[] java.util.HashMap.table accessible: module java.base does not "opens java.util" to unnamed module @25fb0107
   - Caused by: java.lang.reflect.InaccessibleObjectException: Unable to make field transient java.util.HashMap$Node[] java.util.HashMap.table accessible: module java.base does not "opens java.util" to unnamed module @25fb0107
-- api_instance.get_emissions_data_for_locations_by_time returns watttime locations, so it's impossible to infer the original locations# Pitch
+- api_instance.get_emissions_data_for_locations_by_time returns watttime locations, so it's impossible to infer the original locations
+- 
+
+
+---
+
+The energy consumption of training machine learning models is going through the roof:
+- Recent machine learning models consume hundreds of megawatt-hours for training and the number of parameters per model are currently doubling every couple of months.
+- For example, GPT-3, one of most popular models for natural language tasks today,
+  took around 1300 MWh of energy to train.
+- Assuming this energy came from coal, that's more than 1000 tons of carbon emissions
+
+Note that we still want to perform more or less the same kind of work at every individual client to not introduces biases towards clients with low carbon intensity. We simply choose time windows in which it is low for the client to train.
+
+
+- Large ML models are usually trained in highly energy-efficient data centers with hundreds of GPUs and all data in one place.
+- However, in practice, for many applications we cannot collect all data into one centralized location for data privacy reasons.
+- For this, Federated Learning was introduced by Google in 2016:
+  - instead of collecting data to a centralized location, the machine learning model is distributed to a subset of all available clients, they locally train on their data, and simply sent back the updated model
+  - All model updates are aggregated on the server, a new subset of clients is selected and the next round starts.
+
+The big benefit of this appraoch is, that no data ever leaves the devices.
+The big problem is, we are training on infrastructure that is a lot less energy-efficient than modern GPUs, so energy use will rise further
+
+ based on a public dataset consisting of 100000 images of chest x-rays
+
+Imagine training a huge language model, such as GPT-3,
+but instead of collecting all data from users
+you train decentralized to respect their privacy.
+
+In Federated Learning, we do exactly that: On every training round,
+we select a subset of clients in the system, train the model on their local
+data, and only send back the updated model. No data ever leaves the device    
+and we are training decentralized on millions of smartphones, cars, etc.
+
+https://cloud.google.com/healthcare-api/docs/resources/public-datasets/nih-chest
 
 
 # Pitch
@@ -98,7 +118,7 @@ which does exactly that:
 
 ### Evaluation 30s (35s)
 
-We evaluated our approach on a concrete use case:
+We tested our approach on a concrete use case:
 - 100 hospitals distributed over 14 locations want to train a common model for detecting thorax diseases.
 - however, for data privacy reasons they cannot share their patients xrays so they go for a federated learning approach.
 
@@ -106,7 +126,7 @@ We performed this training twice on real data during the same 4-day period:
 - Once with the default random client selection that comes with Flower and
 - once with our plugin activated
 
-The plugin managed to reduce the carbon emissions out-of-the-box by 13%!
+which managed to reduce the carbon emissions out-of-the-box by 13%!
 Without any sacrifices on
 - training duration
 - model accuracy
@@ -124,3 +144,12 @@ Try it out now.
 
 [1] https://arxiv.org/pdf/2006.06676.pdf
 [2] https://arxiv.org/pdf/2112.06905.pdf
+
+
+### Slide sources
+
+- StyleGAN-ADA: https://arxiv.org/pdf/2006.06676.pdf
+- GPT-3: https://arxiv.org/pdf/2005.14165.pdf
+- GLaM: https://arxiv.org/pdf/2112.06905.pdf
+- Gboard: https://arxiv.org/pdf/1811.03604.pdf
+- fedspace: https://arxiv.org/pdf/2202.01267.pdf
