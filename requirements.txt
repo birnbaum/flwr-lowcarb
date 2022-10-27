@@ -1,10 +1,14 @@
+# Requirements for developing and testing flwr-lowcarb
+
 # general
 pandas
+numpy
 jupyterlab
 matplotlib
 seaborn
 
-# specific
-flwr  # [simulation]? see https://flower.dev/docs/installation.html
-
-./carbon_sdk_client
+# lowcarb demo
+flwr[simulation]
+torch
+torchvision
+./python_carbon_sdk_client
