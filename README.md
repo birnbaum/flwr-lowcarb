@@ -6,6 +6,11 @@ Carbon-aware client selection strategy for Flower:
 pip install flwr-lowcarb
 ```
 
+## TODOs
+
+- Create single demo notebook (based on CIFAR or thorax diseases?)
+- Test PyPI package
+
 
 ## Development
 
