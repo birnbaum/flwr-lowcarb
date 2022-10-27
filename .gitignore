@@ -1,4 +1,5 @@
 .idea
+.DS_Store
 venv
 
 __pycache__
@@ -7,6 +8,7 @@ __pycache__
 *.egg-info
 .eggs
 build
+dist
 
 dataset
 example_applications/thorax_disease_classification/trained_models/*
