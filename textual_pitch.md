@@ -77,18 +77,22 @@ We are sure that this will drive widespread adoption in the future.
 The client selection algorithm we have developed so far works for the most common federated learning use cases.
 However, when it comes to its sophistication, the sky is the limit. 
 In the future we plan to make it smarter, and more adaptive to the user application.
-What's important for us here is, that it remains as obfuscated as possible.
-The Lowcarb plugin should just work and save carbon, without the user having to think about it.
+This agrees with our initial goal to make it as *hands-free*, and *batteries-included* as possible.
+The Lowcarb plugin just works and saves carbon, without putting any responsibility on the user.
 
 To give you a quick example what we have in mind here: 
-Our current approach considers 12 hour forecasts, as we consider it a good starting point and middle ground.
-In the future we want to make this time window adaptive to the actual user's workload, depending on how long each round's workload takes.
-E.g. if the workload turns out to be 6 hours, a 12 hour forecasts might appear to be to short and 24 hour forecasts might be neccesary.
+Our current approach considers 12-hour forecasts, what we consider a good middle ground.
+In the future we'll make this time window adaptive to the actual workload, learning from each round.
+E.g. if the workload turns out to be 6 hours, a 12-hour forecast might be to short and 24 hours might be necessary.
 
-Another important aspect we want to emphasize: our Lowcarb plugin will grow with the Carbon-Aware-SDK. When its forecasts become even better in the future, so will Lowcarb's carbon savings.
+Another example we have in mind is to not only pick the right clients, but, 
+given their individual forecasts, also reschedule their workload to the best possible time in the future.
+This might increase the overall time for the training to finish, but for non time-critical applications, the carbon savings are substantially increased. 
+This is [current academic research in our group](https://dl.acm.org/doi/10.1145/3464298.3493399) and Lowcarb will directly profit from this research in the future.
 
-Overall, with Flower's popularity and federated learning being the new cool kid around the block, 
-we think our Lowcarb plugin is a huge opportunity for Carbon-Aware_SDK and carbon-aware software in general to reach a broader audience and raise awareness.
+In the bigger picture, with federated learning's increasing popularity and adaption, 
+we think our Lowcarb plugin is a huge opportunity for the Carbon-Aware-SDK and carbon-aware software in general 
+to reach a broader audience and raise awareness for this urgent climate issue.
 
 ## Technical Details and Toy Example
 
