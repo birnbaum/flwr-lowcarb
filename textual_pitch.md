@@ -12,7 +12,7 @@ Here, the training of the neural network is distributed among many clients that 
 The updated parameters of each individual federated learning client are then agglomerated by a centralized server into one final AI network.
 
 The big advantage: the only thing that is sent over network and is gathered in one place are the weights and biases of the neutral net itself.
-This obfuscates the actual data mitigates many privacy and security concerns.
+This obfuscates the actual sensitive data and mitigates many privacy and security concerns.
 
 The catch: while traditional centralized learning happens in highly efficient, highly optimized data centers, 
 federated learning often relies on power-inefficient local clients
@@ -37,11 +37,11 @@ In one example we'll showcase later, including our plugin (less than 10 lines of
 We estimate that, depending on the use case, these 14% can materialize in millions of tons of CO<sub>2</sub>* that are saved by [Lowcarb](http://).
 
 ## Flower - Lowcarb and the Carbon-Aware-SDK
-The Carbon-Aware-SDK supplies our Lowcarb plugin with all the information it needs.
-
 In most federated learning the individual clients are commonly distributed over many regions with different power grids and corresponding carbon intensity.
-For each training round we try to select clients with the smallest expected carbon emission, performing their individual workload on their respective power grid.
-To obtain the selection with the highest possible carbon savings, we rely on Carbon-Awares-SDK's forecast of the marginal carbon intensity of all client regions. 
+For each training round we try to select clients with the smallest expected carbon emission when performing their individual workload on their respective power grid.
+
+To obtain the selection with the highest possible carbon savings, we rely on Carbon-Awares-SDK's forecast of the marginal carbon intensity for all client regions. 
+With this, the Carbon-Aware-SDK supplies our Lowcarb plugin with all the information it needs to do its job.
 
 **A small, but important technical sidenote:** in reality, our approach is not as naiv as we make it sound here.
 When selecting clients exclusively  on their marginal carbon intensity over and over again, 
@@ -50,4 +50,4 @@ you might end up training on only a few *chosen* ones, leaving out others.
 In the end, this might bias the neural network towards these *chosen* few.
 Consequently, our approach still enforces an unbiased, evenly distributed client selection over the whole training, even while some clients might be handicapped by their less-optimal local power grid's marginal carbon intensity.
 
-Nevertheless, if the user's model is not susceptible towards biases, the Lowcarb framework can be configured to run the training with the lowest possible carbon footprint without caring for even client distribution. 
+(Nevertheless, if the network on its own is not susceptible towards biases, the Lowcarb framework can be configured to run the training with the lowest possible carbon footprint without caring for even client distribution.)
