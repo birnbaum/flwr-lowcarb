@@ -1,15 +1,15 @@
 # Low-carbon, federated thorax disease classification
 ![Example patient x-ray images and their identified thorax diseases](./resources/xray_examples.png)
 ## Problem description
-We examine the problem of training a machine learning (ML) model for thorax disease classification on chest X-Ray images, that are collected from patients of 100 hospitals, in 14 regions, around the world. Since this data cannot be shared across the different entities because of data protection and bandwidth reasons (large amount of images produced by each hospital), we resolved to train our model using the framework of Federated Learning (FL)[[1]](#1). In essence, this is done in the following way:
+We examine the problem of training a machine learning (ML) model for thorax disease classification on chest X-Ray images, that are collected from patients of 100 hospitals, in 14 regions, around the world. Since this data cannot be shared across the different entities because of data protection and bandwidth reasons (large amount of images produced by each hospital), we resolved to train our model using the framework of Federated Learning (FL). In essence, it includes thefollowing three steps:
 
 1. Train the same copy of a ML model on each entities's data set for a set number of iterations
 2. Send the locally updated weights to a central server and average them
 3. Send the updated model back to each entity
 
-Due to large waiting times, that may result from the heterogenity of hardware/data resources and the internet access of each client, most FL applications use a <span style="color:red">random selection</span> of clients for each training round, irrespective of their access to clean energy wrt. CO2 emissions.
+Due to the possibly larger number of participating clients, most FL applications use a <span style="color:red">random selection</span> of clients for each training round, irrespective of their access to clean energy wrt. $\text{CO}_2$ emissions.
 
-Including our Plugin Lowcarb into the FL training pipeline, results in a <span style="color:lightgreen">carbon-aware selection</span> of clients that significantly reduces the Carbon emissions produced during the FL training, while maintining test performance, training speed, and client fairness. 
+Including our Plugin, Lowcarb, into the FL training pipeline, results in a <span style="color:lightgreen">carbon-aware selection</span> of clients that significantly reduces the Carbon emissions produced during the FL training, while maintining test performance, training speed, and client fairness. On this small test example we were able to reduce the $\text{CO}_2$ emissions by 14%. Plots of test losses for the random vs. carbon-aware client selection based FL training are included below.
 (ToDo: Include plots of both test loss curves vs iteration, and training times)
 
 ## About the dataset
