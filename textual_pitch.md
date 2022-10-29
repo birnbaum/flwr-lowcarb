@@ -2,22 +2,20 @@
 
 ## The Problem: Skyrocketing Energy Demand of Machine Learning
 
-With their ever increasing complexity, the energy demand to train state-of-the-art machine learning models is skyrocketing.
-To put things into perspective, the training of famous networks like GPT-3, StyleGAN2-ada or GLaM had an estimated carbon footprint of about 154t, 611t and 217t CO<sub>2</sub>*.
+With their ever increasing complexity, the energy demand to train state-of-the-art machine learning (ML) models is skyrocketing.
+To put things into perspective, the training of famous networks like GPT-3, StyleGAN2-ada or GLaM had an estimated carbon footprint of about 154t, 611t and 217t CO<sub>2</sub>*, respectively.
+With modern devices collecting large amounts and privacy sensitive data on the one hand, and governments pushing data protection regulations, e.g. GDPR, on the other hand, there is an ever growing need for systems that enable data processing in a decentralized manner, that is, on the devices that collect them, instead of a centralized server.
+Gathering all necessary data in one place is a privacy/mass surveillance nightmare in itself, and risking to send sensitive data over possibly compromised networks is a bad idea anyway.
 
-To make things even more complicated, in some applications, the training data raised security and privacy concern.
+<!--To make things even more complicated, in some applications, the training data raised security and privacy concern.
 Gathering all necessary data in one place is a privacy/mass surveillance nightmare in itself,
-and risking to send sensitive data over possibly compromised networks is a bad idea anyway.
-This is why Google introduced [Federated Machine Learning](http://) back in 20xx.
-Here, the training of the neural network is distributed among many clients that train on their own local data.
-The updated parameters of each individual federated learning client are then agglomerated by a centralized server into one final AI network.
+and risking to send sensitive data over possibly compromised networks is a bad idea anyway. -->
 
-The big advantage: the only thing that is sent over network and is gathered in one place are the weights and biases of the neutral net itself.
-This obfuscates the actual sensitive data and mitigates many privacy and security concerns.
-
-The catch: while traditional centralized learning happens in highly efficient, highly optimized data centers, 
-federated learning often relies on power-inefficient local clients
-(e.g. 600W consumer graphic cards in workstations for medical image analysis). Needlessly to say, this further worsens AI's carbon problem.
+This is why Google introduced [Federated Learning (FL)](https://arxiv.org/abs/1602.05629) as a new ML paradigm, back in 2016.
+Here, the training of the machine learning model is distributed among many clients that train the same model on their own local data.
+The updated parameters of each individual client's model are then collected and agglomerated by a centralized server before being send back to each client. Repeating this process over and over again results in a final ML model that caries the wisdom of each client, e.g. performs well on the overall data, without ever having had to share data between clients or the central server. Since the number of participating devices in such a setup could easily add up to multiple million of devices, e.g. mobile phones, most FL setups employ a client selection scheme that considers only a subset of participating clients in each FL training round. The used selection algorithms should ensure two main properties: [Communication Efficiency](https://www.usenix.org/system/files/osdi21-lai.pdf) and [Fairness](https://arxiv.org/abs/2110.15545). While Communication Efficiency aims to prioritize clients that offer the greatest utility in improving overall model accuracy training time, fairness is concerned with ensuring unbiasedness of the model, that is, the final model should perform equally well on each clients local data and is not prone towards a solution of a group of clients that are over-represented in terms of their data or their overall participation in the training.
+To wrap-up, FL's big advantage: Intead of sharing potentially large quantities of privacy sensitive data, we only share model parameters with a central server, while still benefitting from good quality ML models.
+The catch: While traditional centralized learning happens in highly efficient, highly optimized data centers, federated learning often relies on power-inefficient local clients (e.g. 600W consumer graphical processing units (GPU) in workstations for medical image analysis) and potentially more training iterations due to non-iid. local training data across the clients. Needlessly to say, this further worsens AI's carbon problem.
 
 This is where our CarbonHack22's [Lowcarb](http://) project, a plugin for the federated learning framework Flower, comes into play.
 
@@ -25,13 +23,11 @@ This is where our CarbonHack22's [Lowcarb](http://) project, a plugin for the fe
 
 [Flower](http:/https://flower.dev/) is a popular solution 
 that brings the federated learning approach to established AI frameworks like PyTorch and TensorFlow. 
-For CarbonHack22, we have developed an *all-batteries-included* plugin for the Flower framework 
-to make it carbon-aware with less than 10 lines of code.
+For CarbonHack22, we have developed an *all-batteries-included* plugin for the Flower framework to make it carbon-aware with less than 10 lines of code.
 
-By including our plugin, the federated learning is split up into training rounds, 
-where only clients with the least present carbon footprint participate.
-This reduces the overall carbon footprint of the training by focusing on the local renewable energy sources in each client's region.
-
+By focusing on the local renewable energy sources in each client's region, our plugin reduces the overall carbon footprint of the FL training, without loss of communication efficiency and client fairness.
+<!--By including our Plugin, the federated learning is split up into training rounds, where only clients with the least present carbon footprint participate.
+This reduces the overall carbon footprint of the training by focusing on the local renewable energy sources in each client's region.-->
 We've reached an implementation, where the scheduling of training rounds and the carbon-aware sampling of clients is totally obfuscated from the user.
 This takes away responsibility from developers and opens up carbon-aware federated machine learning to everybody!
 
@@ -41,7 +37,7 @@ We estimate that, depending on the use case, these 14% can materialize in millio
 ## Lowcarb and the Carbon-Aware-SDK
 
 In most federated learning the individual clients are commonly distributed over many regions / power grids with different carbon intensity.
-For each training round our plugin selects the clients with the smallest expected carbon emission when performing the individual workload on their respective power grid.
+For each training round our plugin selects the clients with the smallest expected carbon emission when performing the individual workload on their respective power grid. (TODO: ADD FAIRNESS)
 
 To derive the best selection yielding the lowest carbon footprint, we rely on Carbon-Awares-SDK's forecast of the marginal carbon intensity for all client regions.
 For each training round our plugin pulls the forecast for the next 12 hours from a Carbon-Awares-SDK's WebApi that is specified by the user. (They can choose if they host it locally or rely on a cloud solution)
@@ -51,20 +47,22 @@ What's important: the Carbon-Aware-SDK supplies our Lowcarb plugin with all the 
 
 ## The Impact: Example Application of Carbon-Aware Federated Learning using Lowcarb
 
-To demonstrate the impact of the Lowcarb plugin when used with Carbon-Aware-SDK, we have developed an example Flower application for the training of a neutral net on the privacy-sensitive X-ray data for medical image recognition of thorax disease using the XYZ dataset
+To demonstrate the impact of the Lowcarb plugin when used with Carbon-Aware-SDK, we have developed an example Flower application for the training of a neutral net on the privacy-sensitive X-ray data for medical image recognition of thorax diseases using the NIH chest [X-Ray dataset](https://cloud.google.com/healthcare-api/docs/resources/public-datasets/nih-chest).
 As a toy example, it assumes only 100 clients spread over 14 regions worldwide, but it can also demonstrate what carbon savings can be expected from Lowcarb.
 
-Let's start with the results right away: by using Lowcarb, the federated learning example saved 14% in carbon emission over chosing clients randomly, while obtaining same accuracy and precision, as well as even client distribution.
-To further emphasize the impact of Lowcarb we extrapolated these 14% to other federated learning szenarios.
+Let's start with the results right away: by using Lowcarb, the federated learning example saved 14% in carbon emission over chosing clients randomly, without sacrificing training time, training accuracy, and client fairness.
+<!--
+while obtaining the same test accuracy and precision, as well as even client distribution.-->
+To further emphasize the impact of Lowcarb we extrapolated these 14% to other federated learning szenarios of the near future.
 
 _Insert extrapolated usecases here_
 ### Case study 1: Federated autonomous driving fleet
-Tesla’s Autopilot is currently one of the most advanced autonomous driving systems out there. During [this CVPR 2021 Workshop](https://blogs.nvidia.com/blog/2021/06/22/tesla-av-training-supercomputer-nvidia-a100-gpus/), their (now Ex-)Senior Diretor of AI, Andrej Karpathy, shed some light into the inner wokrings of this system, that we are going to use as a starting point.\
-In essence, each car in their autonomous car fleet performs inference on real time camera data, using a very large [Visual Transformer](https://arxiv.org/abs/2010.11929) model, the state-of-the art architecture for Deep Learning, which lives on an *on-board* GPU. Once they have collected $\approx$ 1 million data points, each consisting of 10-second video clips, with 36 frames per second ($\approx$ 1.5 PetaBytes of data), they (centrally) finetune their model on a total of 5760 of NVIDIA’s A100 80GB flagship GPUs, before updating the models of their fleet and restarting this whole process. Although they do not provide further information on needed training time, [this NVIDIA](https://developer.nvidia.com/blog/training-a-state-of-the-art-imagenet-1k-visual-transformer-model-using-nvidia-dgx-superpod/) source states, that training a basic Visual Transformer on 1 million images on one A100 80GB takes roughly 1 week $=$ 10.080 hours.\
-Assuming a simplified FL setup with 10 clients, each holding a disjoint subset of the aforementioned data (simplified to one frame per data point) containing 100k data points, the minimum training time on each client to achieve a similar result would be at 10.080 hours / 10  $\approx$ 1.000 hours. Since the TDP of a NVIDIA A100 80GB is 300W, this would result in $300\text{W} \times 1.000\text{h} \times 400 \frac{\text{gCO}_2}{kWh} = 1.2 \text{tCO}_2$ produced by each car for one finetuning iteration, or a total of $12\text{tCO}_2$ produced by the entire fleet (assuming we constantly hit TDP).\
+Tesla’s Autopilot is currently one of the most advanced autonomous driving systems out there. During [this CVPR 2021 Workshop](https://blogs.nvidia.com/blog/2021/06/22/tesla-av-training-supercomputer-nvidia-a100-gpus/), their (now Ex-)Senior Diretor of AI, Andrej Karpathy, shed some light on the inner workings of this system, that we are going to use as a starting point.\
+In essence, each car in their autonomous car fleet performs inference on real time camera data, using a very large [Visual Transformer Neural Network](https://arxiv.org/abs/2010.11929), the state-of-the art architecture for Deep Learning, which lives on an *on-board* GPU. Once they have collected $\approx$ 1 million data points, each consisting of 10-second video clips, with 36 frames per second ($\approx$ 1.5 PetaBytes of data), they (centrally) finetune their model on a total of 5760 of NVIDIA’s A100 80GB flagship GPUs, before distributing the updated model back to their fleet and restarting this whole process. Although they do not provide further information on needed training time, [this NVIDIA](https://developer.nvidia.com/blog/training-a-state-of-the-art-imagenet-1k-visual-transformer-model-using-nvidia-dgx-superpod/) source states, that training a basic Visual Transformer on 1 million images on one A100 80GB takes roughly 1 week $=$ 10.080 hours.\
+Assuming an over-simplified where training time scales linearly with the number of data points, a FL setup with 10 clients, each holding a disjoint subset of 100k data points of the aforementioned data (simplified to one frame per data point), would take 10.080 hours / 10  $\approx$ 1.000 hours to train a basic Viual Transformer. Since the TDP of a NVIDIA A100 80GB is 300W, this would result in $300\text{W} \times 1.000\text{h} \times 400 \frac{\text{gCO}_2}{kWh} = 1.2 \text{tCO}_2$ produced by each car for one finetuning iteration, or a total of $12\text{tCO}_2$ produced by the entire fleet (assuming we constantly hit TDP).\
 According to sources [[1]](https://www.researchandmarkets.com/reports/5206354/autonomous-vehicle-market-by-automation-level-by?utm_source=CI&utm_medium=PressRelease&utm_code=txvgwg&utm_campaign=1479104+-+Global+Outlook+for+the+Autonomous+Vehicle+Market+to+2030+-+Sale+of+Autonomous+Vehicles+is+Forecast+to+Reach+58+Million+Units+by+2030&utm_exec=Rcent%20cari18prd), [[2]](https://www.statista.com/press/p/autonomous_cars_2020/) & [[3]](https://www.sciencedirect.com/science/article/pii/S0960982216303414#:~:text=Summary,Michael%20Gross%20reports.), by 2030, there could be somewhere between 60-150 million fully autonomous vehicles on the roads, worldwide. Scaling the case above on this amount of cars would result in at least $6 \text{million} * 1.2 \text{tCO}_2  = 7.2$ million tons of $\text{CO}_2$ emissision, and thus $7.2 \text{million} * 0.14 \approx 1$ million $\text{tCO}_2$  savings out of the box by using our approach.\
 Note: We are aware that many of the before made assumptions, including the overall consent of major car manufacturers to participate in such a training setup or the TDP of the used GPUs, are assumptions favoring higher $\text{CO}_2$ emissions and thus savings. \
-On the other hand, however, we excluded the pre-training phase of these models, the complexity of the used data set, the longer training runs due to non-identically distributed data over clients, the hyperparameter optimization which results in many more copies of the same training runs, and other factors in our calculation, which easily compensate and even favor higher emissions and savings.
+On the other hand, however, we excluded the pre-training phase of these models, the complexity of the used data set, the longer training runs due to non-identically distributed data over clients, the hyperparameter optimization which results in many more copies of the same training runs, and other factors in our calculation, which easily compensate and even favor lower emissions and thus savings.
 
 ### Case study 2: Federated Learning in Hospitals?
 
@@ -99,11 +97,12 @@ given their individual forecasts, also reschedule their workload to the best pos
 This might increase the overall time for the training to finish, but for non time-critical applications, the carbon savings are substantially increased. 
 This is [current academic research in our group](https://dl.acm.org/doi/10.1145/3464298.3493399) and Lowcarb will directly profit from this research in the future.
 
-In the bigger picture, with federated learning's increasing popularity and adaption, 
+In the bigger picture, with federated learning's increasing popularity and adoption, 
 we think our Lowcarb plugin is a huge opportunity for the Carbon-Aware-SDK and carbon-aware software in general 
 to reach a broader audience and raise awareness for this urgent climate issue.
 
 ## Technical Details and Toy Example
+
 
 ### The Carbon Aware Client Sampling Algorithm
 
