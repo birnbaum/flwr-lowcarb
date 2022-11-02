@@ -20,7 +20,7 @@ if __name__ == "__main__":
         long_description_content_type='text/markdown',
         keywords=["carbon awareness", "federated learning", "client selection", "flower"],
         url="https://github.com/birnbaum/lowcarb",
-        packages=["lowcarb"] + open_api_packages,
+        packages=["lowcarb", "lowcarb.python_carbon_sdk_client"] + open_api_packages,
         license="MIT",
         python_requires=">=3.7",
         setup_requires=['setuptools_scm'],
