@@ -5,33 +5,29 @@ A plugin for the Flower framework, which enables privacy-aware and carbon-aware 
 
 ## The Problem: Skyrocketing Energy Demand of Machine Learning
 
-The ever-increasing complexity of machine learning (ML) models as well as growing amounts of data, is leading to new records in energy usage month by month. Training a state-of-the-art image or language model like StyleGAN2-ada, GPT-3 or GLaM on highly energy-efficient GPU clusters has an estimated carbon footprint of about 154t, 611t and 217t CO2, respectively (at the global carbon intensity average of 475 gCO2/kWh).
+With governments pushing data protection regulations, collecting large datasets for the training of machine learning (ML) models in one central location became unfeasible. This is why Google introduced Federated Learning (FL) in 2016. FL splits the training of a global machine learning model into training rounds, in which the global model is distributed among many clients and trained on the client's individual local data. Each round, a centralized server then agglomerates the updated model parameters of each client into the global model, making it the starting point for the next round. After a sufficient number of rounds, the final global ML model caries the wisdom of each client and performs well on the whole dataset. FL achieves this by sharing the client's model parameters but never the privacy-sensitive data itself.
 
-Unfortunately, in practice, it is often simply not possible to collect all data in once central location for privacy reasons. As governments are pushing data protection regulations, there is an ever-growing need for systems that enable data processing directly at the data source, instead of a centralized server. This is why Google introduced Federated Learning (FL) in 2016.
+At the same time, the increasing complexity of ML models comes with skyrocketing energy consumption: training state-of-the-art image or language model like StyleGAN2-ada, GPT-3 or GLaM  has an estimated carbon footprint of about 154t, 611t and 217t CO2 (*), even in highly energy-efficient centralized data centers. In stark contrast, FL has to rely on power-inefficient local clients most of the time. Consequently, while mitigating privacy concerns, FL may worsen AI's carbon problem.
 
-Here, the training of a global machine learning model is distributed among many clients that train the same model on their own local data for a specified number of epochs.
-The updated model parameters of each individual client's model are then collected and agglomerated by a centralized server before being sent back to each client. Repeating this process over and over again results in a final ML model that caries the wisdom of each client, e.g. performs well on the overall data, without ever having had to share data between clients or the central server. The training of each client on its local data is refered to as local training round, wheras the server-led process of first sending the global model parameters to the clients, then collecting each client's model parameter updates, and finally agglomerating the different client paramters into a single set of paramters, is refered to as communication round.\
-Since the number of participating devices in such a setup could easily add up to multiple million of devices, e.g. mobile phones, most FL setups employ a client selection scheme that considers only a subset of participating clients in each FL training round. The used selection algorithms should optimize the two following objectives: [Time-to-accuracy](https://www.usenix.org/system/files/osdi21-lai.pdf) and [Fairness](https://arxiv.org/abs/2110.15545). While time-to-accuracy aims to prioritize clients that offer the greatest utility in improving overall model accuracy and tastest overall training time, fairness is concerned with ensuring unbiasedness of the model, that is, the final model should perform equally well on each clients local data and is not prone towards a solution of a group of clients that are over-represented in terms of their data or their overall participation in the training.
+This is where our CarbonHack22's project [Lowcarb](http://) comes into play. [Lowcarb](http://) is a plugin for the popular FL framework [Flower](http:/https://flower.dev/) that uses the Carbon-Aware-SDK to make FL carbon-aware.
 
-To wrap-up, FL's big advantage: Intead of sharing potentially large quantities of privacy sensitive data, we only share model parameters with a central server, while still benefitting from good quality ML models.\
-The catch: While traditional centralized learning happens in highly efficient, highly optimized data centers, federated learning often relies on power-inefficient local clients (e.g. 600W consumer graphical processing units (GPU) in workstations for medical image analysis) and potentially more training iterations due to non-iid. local training data across the clients. Needlessly to say, this further worsens AI's carbon problem.
+(*assuming 475 gCO2/kWh as global average)
 
-This is where our CarbonHack22's [Lowcarb](http://) project, a plugin for the federated learning framework Flower, comes into play.
 
 ## The Solution: Carbon-Aware Federated Machine Learning with [Lowcarb](http://)
 
-[Flower](http:/https://flower.dev/) is a popular solution 
-that brings the federated learning approach to established AI frameworks like PyTorch and TensorFlow. 
-For CarbonHack22, we have developed an *all-batteries-included* plugin for the Flower framework to make it carbon-aware with less than 10 lines of code.
+[Flower](http:/https://flower.dev/) is a popular solution that brings the federated learning approach to established AI frameworks like PyTorch and TensorFlow. For CarbonHack22, we have developed an *all-batteries-included* plugin for the Flower framework to make it carbon-aware with less than 10 lines of code.
 
-By focusing on the local renewable energy sources in each client's region, our plugin reduces the overall carbon footprint of the FL training, without loss of communication efficiency and client fairness.
-<!--By including our Plugin, the federated learning is split up into training rounds, where only clients with the least present carbon footprint participate.
-This reduces the overall carbon footprint of the training by focusing on the local renewable energy sources in each client's region.-->
-We've reached an implementation, where the scheduling of training rounds and the carbon-aware sampling of clients is totally obfuscated from the user.
-This takes away responsibility from developers and opens up carbon-aware federated machine learning to everybody!
+For large device pools (e.g. millions of mobile phones, cars etc.), FL considers only a subset of participating clients in each training round. For the selection of clients current widespread approaches focus on two objectives: [Time-to-Accuracy](https://www.usenix.org/system/files/osdi21-lai.pdf) and [Fairness](https://arxiv.org/abs/2110.15545). Time-to-Accuracy prioritizes clients that improve overall model accuracy, while fairness avoids bias of the final model towards data of any specific set of clients. With our Lowcarb plugin we now add a **third** objective that also considers the marginal carbon intensity of the client's grid.
+
+While maintaining Time-to-Accuracy and Fairness, Lowcarb achieves a reduction of the overall carbon footprint of the FL training by focusing on the local renewable energy sources in each client region.
+
+<!--
+Our plugin stays out of way and the carbon-aware client selection happens automatically without putting any responsibility onto the user.
+This opens up carbon-aware federated machine learning to everybody!
 
 In one example [we showcase later](#The-Impact:-Example-Application-of-Carbon-Aware-Federated-Learning-using-Lowcarb), including our plugin (less than 10 lines of code) reduced the training's energy-consumption by 14%.
-We estimate that, depending on the use case, these 14% can materialize in millions of tons of CO<sub>2</sub>* that are saved by [Lowcarb](http://).
+We estimate that, depending on the use case, these 14% can materialize in millions of tons of CO<sub>2</sub>* that are saved by [Lowcarb](http://). -->
 
 ## Lowcarb and the Carbon-Aware-SDK
 
