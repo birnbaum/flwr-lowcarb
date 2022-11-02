@@ -77,7 +77,7 @@ class LowcarbClientManager(SimpleClientManager):
         for location in locations:
             end = datetime.now() + timedelta(hours=self.forecast_window)
             response = self.api_instance.get_current_forecast_data([location], data_end_at=end,
-                                                                   window_size=self.forecast_window)
+                                                                   window_size=self.workload_duration)
             forecast_data = response[0]['forecast_data']
             result[location] = [entry['value'] for entry in forecast_data]
         return result
