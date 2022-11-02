@@ -1,6 +1,8 @@
-# Carbon-Aware Federated Learning [![PyPI version](https://img.shields.io/pypi/v/flwr-lowcarb.svg?color=52c72b)](https://pypi.org/project/flwr-lowcarb/) [![Supported versions](https://img.shields.io/pypi/pyversions/flwr-lowcarb.svg)](https://pypi.org/project/flwr-lowcarb/) [![License](https://img.shields.io/pypi/l/flwr-lowcarb.svg)](https://pypi.org/project/flwr-lowcarb/)
+# Carbon-Aware Federated Learning
 
-Carbon-aware client selection strategy for Flower:
+[![PyPI version](https://img.shields.io/pypi/v/flwr-lowcarb.svg?color=52c72b)](https://pypi.org/project/flwr-lowcarb/) [![Supported versions](https://img.shields.io/pypi/pyversions/flwr-lowcarb.svg)](https://pypi.org/project/flwr-lowcarb/) [![License](https://img.shields.io/pypi/l/flwr-lowcarb.svg)](https://pypi.org/project/flwr-lowcarb/)
+
+Carbon-aware client selection strategy for Flower
 
 ```
 pip install flwr-lowcarb
@@ -10,6 +12,7 @@ pip install flwr-lowcarb
 
 - Create single demo notebook (based on CIFAR or thorax diseases?)
 - Test PyPI package
+- Create README
 
 
 ## Development

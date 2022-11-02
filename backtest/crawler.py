@@ -2,11 +2,11 @@ from datetime import timedelta
 
 import pandas as pd
 
-from carbon_sdk_client.openapi_client.api.carbon_aware_api import CarbonAwareApi
-from carbon_sdk_client.openapi_client.api_client import ApiClient
-from carbon_sdk_client.openapi_client.configuration import Configuration
-from carbon_sdk_client.openapi_client.models import EmissionsForecastDTO, EmissionsForecastBatchParametersDTO
-
+from lowcarb.python_carbon_sdk_client.openapi_client.api.carbon_aware_api import CarbonAwareApi
+from lowcarb.python_carbon_sdk_client.openapi_client.api_client import ApiClient
+from lowcarb.python_carbon_sdk_client.openapi_client.configuration import Configuration
+from lowcarb.python_carbon_sdk_client.openapi_client.model.emissions_forecast_batch_parameters_dto import \
+    EmissionsForecastBatchParametersDTO
 
 LOCATIONS = ['westcentralus', 'ukwest', 'uksouth', 'westeurope', 'westus', 'australiacentral', 'australiaeast', 'swedencentral', 'norwaywest', 'norwayeast', 'northeurope', 'centralus', 'francesouth', 'francecentral']
 
