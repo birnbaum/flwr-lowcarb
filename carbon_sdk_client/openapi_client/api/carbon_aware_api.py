@@ -11,8 +11,8 @@
 import re  # noqa: F401
 import sys  # noqa: F401
 
-from openapi_client.api_client import ApiClient, Endpoint as _Endpoint
-from openapi_client.model_utils import (  # noqa: F401
+from carbon_sdk_client.openapi_client.api_client import ApiClient, Endpoint as _Endpoint
+from carbon_sdk_client.openapi_client.model_utils import (  # noqa: F401
     check_allowed_values,
     check_validations,
     date,
@@ -21,12 +21,12 @@ from openapi_client.model_utils import (  # noqa: F401
     none_type,
     validate_and_convert_types
 )
-from openapi_client.model.carbon_intensity_batch_parameters_dto import CarbonIntensityBatchParametersDTO
-from openapi_client.model.carbon_intensity_dto import CarbonIntensityDTO
-from openapi_client.model.emissions_data import EmissionsData
-from openapi_client.model.emissions_forecast_batch_parameters_dto import EmissionsForecastBatchParametersDTO
-from openapi_client.model.emissions_forecast_dto import EmissionsForecastDTO
-from openapi_client.model.validation_problem_details import ValidationProblemDetails
+from carbon_sdk_client.openapi_client.model.carbon_intensity_batch_parameters_dto import CarbonIntensityBatchParametersDTO
+from carbon_sdk_client.openapi_client.model.carbon_intensity_dto import CarbonIntensityDTO
+from carbon_sdk_client.openapi_client.model.emissions_data import EmissionsData
+from carbon_sdk_client.openapi_client.model.emissions_forecast_batch_parameters_dto import EmissionsForecastBatchParametersDTO
+from carbon_sdk_client.openapi_client.model.emissions_forecast_dto import EmissionsForecastDTO
+from carbon_sdk_client.openapi_client.model.validation_problem_details import ValidationProblemDetails
 
 
 class CarbonAwareApi(object):

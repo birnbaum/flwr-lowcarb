@@ -6,7 +6,7 @@
 # raise a `RecursionError`.
 # In order to avoid this, import only the API that you directly need like:
 #
-#   from openapi_client.api.carbon_aware_api import CarbonAwareApi
+#   from carbon_sdk_client.openapi_client.api.carbon_aware_api import CarbonAwareApi
 #
 # or import this package, but before doing it, use:
 #
@@ -14,4 +14,4 @@
 #   sys.setrecursionlimit(n)
 
 # Import APIs into API package:
-from openapi_client.api.carbon_aware_api import CarbonAwareApi
+from carbon_sdk_client.openapi_client.api.carbon_aware_api import CarbonAwareApi

@@ -20,7 +20,7 @@ import uuid
 
 from dateutil.parser import parse
 
-from openapi_client.exceptions import (
+from carbon_sdk_client.openapi_client.exceptions import (
     ApiKeyError,
     ApiAttributeError,
     ApiTypeError,
