@@ -73,17 +73,11 @@ class LowcarbClientManager(SimpleClientManager):
 
     def _get_carbon_forecasts(self, locations) -> Dict[str, list]:
         """Returns the carbon forecast for each provided location."""
-        dfs = []
+        result = {}
         for location in locations:
             end = datetime.now() + timedelta(hours=self.forecast_window)
-            response = self.api_instance.get_current_forecast_data([location],
-                                                                   data_end_at=end,
+            response = self.api_instance.get_current_forecast_data([location], data_end_at=end,
                                                                    window_size=self.forecast_window)
-            dfs.append(pd.DataFrame({
-                'time': [entry['timestamp'] for entry in response[0]['forecast_data']],
-                'value': [entry['value'] for entry in response[0]['forecast_data']],
-                'location': locations
-            }))
-        df = pd.concat(dfs)
-        forecasts = {region: forecast['value'].to_list() for region, forecast in df.groupby('region')}
-        return forecasts
+            forecast_data = response[0]['forecast_data']
+            result[location] = [entry['value'] for entry in forecast_data]
+        return result
