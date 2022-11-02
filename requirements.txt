@@ -11,4 +11,4 @@ seaborn
 flwr[simulation]
 torch
 torchvision
-./lowcarb/python_carbon_sdk_client
+./carbon_sdk_client
