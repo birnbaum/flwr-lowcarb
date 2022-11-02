@@ -5,10 +5,9 @@ A plugin for the Flower framework, which enables privacy-aware and carbon-aware 
 
 ## The Problem: Skyrocketing Energy Demand of Machine Learning
 
-The ever-increasing complexity of machine learning (ML) models as well as growing amounts of data to train such models, is leading to new records in energy usage month by month.
-Training a state-of-the-art image or language model like StyleGAN2-ada [1], GPT-3 [2] or GLaM [3] has an estimated carbon footprint of about 154t, 611t and 217t CO<sub>2</sub>, respectively, at the global carbon intensity average of 475 gCO2/kWh.
+The ever-increasing complexity of machine learning (ML) models as well as growing amounts of data, is leading to new records in energy usage month by month. Training a state-of-the-art image or language model like StyleGAN2-ada, GPT-3 or GLaM on highly energy-efficient GPU clusters has an estimated carbon footprint of about 154t, 611t and 217t CO2, respectively (at the global carbon intensity average of 475 gCO2/kWh).
 
-However, these figures assume that models are being trained on highly energy-efficient GPU clusters. Unfortunately, in practice, in many cases it is simply not possible to collect all data in once central location for privacy reasons. As governments are pushing data protection regulations, there is an ever-growing need for systems that enable data processing directly at the data source, instead of a centralized server. This is why Google introduced Federated Learning (FL) [4] in 2016.
+Unfortunately, in practice, it is often simply not possible to collect all data in once central location for privacy reasons. As governments are pushing data protection regulations, there is an ever-growing need for systems that enable data processing directly at the data source, instead of a centralized server. This is why Google introduced Federated Learning (FL) in 2016.
 
 Here, the training of a global machine learning model is distributed among many clients that train the same model on their own local data for a specified number of epochs.
 The updated model parameters of each individual client's model are then collected and agglomerated by a centralized server before being sent back to each client. Repeating this process over and over again results in a final ML model that caries the wisdom of each client, e.g. performs well on the overall data, without ever having had to share data between clients or the central server. The training of each client on its local data is refered to as local training round, wheras the server-led process of first sending the global model parameters to the clients, then collecting each client's model parameter updates, and finally agglomerating the different client paramters into a single set of paramters, is refered to as communication round.\
@@ -129,9 +128,3 @@ even while some clients might be handicapped by their less-optimal local power g
 (Nevertheless, if the network on its own is not susceptible towards biases, 
 the Lowcarb framework can be configured to run the training with the lowest possible carbon footprint 
 without caring for even client distribution.)
-
-
-[1] StyleGAN-ADA: https://arxiv.org/pdf/2006.06676.pdf
-[2] GPT-3: https://arxiv.org/pdf/2005.14165.pdf
-[3] GLaM: https://arxiv.org/pdf/2112.06905.pdf
-[4] FL: https://arxiv.org/abs/1602.05629
