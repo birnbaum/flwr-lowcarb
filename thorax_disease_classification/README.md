@@ -10,9 +10,11 @@ We examine the problem of training a machine learning (ML) model for thorax dise
 Due to the possibly larger number of participating clients, most FL applications use a <span style="color:red">random selection</span> of clients for each training round, irrespective of their access to clean energy wrt. $\text{CO}_2$ emissions.
 
 Including our Plugin, Lowcarb, into the FL training pipeline, results in a <span style="color:lightgreen">carbon-aware selection</span> of clients that significantly reduces the Carbon emissions produced during the FL training, while maintining test performance, training speed, and client fairness. On this small test example we were able to reduce the $\text{CO}_2$ emissions by 14%, without loss of test performance, as can be seen on the plots below.
-Random vs Lowcarb client selection test loss             |  Random vs Lowcarb client selection test acc
-:-------------------------:|:-------------------------:
-![Random vs Lowcarb client selection - test loss](./resources/test_loss_random_vs_lowcarb.png)  |  ![Random vs Lowcarb client selection - test accuracy](./resources/test_acc_random_vs_lowcarb.png)
+<!--
+Random vs Lowcarb client selection test loss             |  Random vs Lowcarb client selection test acc |  Random vs Lowcarb client selection test acc
+:-------------------------:|:-------------------------:|:--------------------:
+![Random vs Lowcarb client selection - test loss](./resources/test_loss_random_vs_lowcarb.png)  |  ![Random vs Lowcarb client selection - test accuracy](./resources/test_acc_random_vs_lowcarb.png)       | ![Lowcarb client selection - test accuracy](./resources/random_vs_lowcarb_co2_intensities_with_means.png) -->
+![Thorax evaluation plots](./resources/thorax_eval.png)
 
 ## About the dataset
 ### National Institutes of Health (NIH) Chest X-Ray Dataset
