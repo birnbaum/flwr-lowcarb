@@ -14,7 +14,7 @@ Including our Plugin, Lowcarb, into the FL training pipeline, results in a <span
 Random vs Lowcarb client selection test loss             |  Random vs Lowcarb client selection test acc |  Random vs Lowcarb client selection test acc
 :-------------------------:|:-------------------------:|:--------------------:
 ![Random vs Lowcarb client selection - test loss](./resources/test_loss_random_vs_lowcarb.png)  |  ![Random vs Lowcarb client selection - test accuracy](./resources/test_acc_random_vs_lowcarb.png)       | ![Lowcarb client selection - test accuracy](./resources/random_vs_lowcarb_co2_intensities_with_means.png) -->
-![Thorax evaluation plots](./resources/thorax_eval.png)
+![Thorax evaluation plots](./resources/random_vs_lowcarb_comparison.png)
 
 ## About the dataset
 ### National Institutes of Health (NIH) Chest X-Ray Dataset
